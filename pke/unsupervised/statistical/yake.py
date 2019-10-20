@@ -363,21 +363,22 @@ class YAKE(LoadFile):
                     prod_ = 1.
                     sum_ = 0.
                     for j, token in enumerate(tokens):
-                        if 'isstop' in self.features[token] and self.features[token]['isstop']:
-                            term_left = tokens[j-1]
-                            term_right = tokens[j+1]
-                            term_stop = token
-                            prob_t1 = self.contexts[term_left][1].count(
-                                term_stop) / self.features[term_left]['TF']
-                            prob_t2 = self.contexts[term_stop][0].count(
-                                term_right) / self.features[term_right]['TF']
+                        try:
+                            if self.features[token]['isstop']:
+                                term_left = tokens[j-1]
+                                term_right = tokens[j+1]
+                                term_stop = token
+                                prob_t1 = self.contexts[term_left][1].count(term_stop) / self.features[term_left]['TF']
+                                prob_t2 = self.contexts[term_stop][0].count(term_right) / self.features[term_right]['TF']
 
-                            prob = prob_t1 * prob_t2
-                            prod_ *= (1 + (1 - prob))
-                            sum_ -= (1 - prob)
-                        else:
-                            prod_ *= self.features[token]['weight']
-                            sum_ += self.features[token]['weight']
+                                prob = prob_t1 * prob_t2
+                                prod_ *= (1 + (1 - prob))
+                                sum_ -= (1 - prob)
+                            else:
+                                prod_ *= self.features[token]['weight']
+                                sum_ += self.features[token]['weight']
+                        except:
+                            continue
 
                     self.weights[candidate] = prod_
                     self.weights[candidate] /= TF * (1 + sum_)
